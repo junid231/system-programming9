@@ -3,7 +3,7 @@
 #include <time.h>
 
 #define MAX_COROUTINES 10
-#define deltaTime 0.05f     // 1 frame == 50 ms
+#define deltaTime 1.0f     // 1 frame == 50 ms
 
 typedef struct {
     bool isRunning;

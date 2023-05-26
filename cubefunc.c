@@ -25,9 +25,9 @@ int rotmat[4][9] = {
 
 /* ========== Global Variables (Just used in this file) ========== */
 
-LED led[4][9];
-LED currled[4][9];
-LED prevled[4][9];
+LED led[6][9];
+LED currled[6][9];
+LED prevled[6][9];
 
 /* =============================================================== */
 
@@ -105,6 +105,16 @@ Color MakeRandomColor() {
 Color MakeColor(int r, int g, int b) {
     Color color = {r, g, b};
     return color;
+}
+
+void ChangeColorImm() {
+    for(int face=0; face<6; face++) {
+        for(int lednum=0; lednum<9; lednum++) {
+            currled[face][lednum].color.r = led[face][lednum].color.r;
+            currled[face][lednum].color.g = led[face][lednum].color.g;
+            currled[face][lednum].color.b = led[face][lednum].color.b;
+        }
+    }
 }
 
 void FadeColor(Coroutine* coroutine) {

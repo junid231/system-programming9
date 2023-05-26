@@ -5,7 +5,7 @@ void ButtonDown(int face, int lednum)
 {
     /* ---------- 여기에 몇 번 face의 몇 번 버튼이 눌렸을 때 어떤 동작을 수행할지를 기술 ----------*/
 
-    // 버튼 기준 상하좌우 십자 모양으로 LED 토글하는 애플리케이션 채훈이 작품
+    // 버튼 기준 상하좌우 십자 모양으로 LED 토글하는 애플리케이션
     if(GetColor(face, lednum).r == 0 && GetColor(face, lednum).g == 0 && GetColor(face, lednum).b == 0)
         SetColor(face, lednum, MakeRandomColor());
     else SetColor(face, lednum, MakeColor(0, 0, 0));
@@ -19,7 +19,6 @@ void ButtonDown(int face, int lednum)
     StartCoroutine(FadeColor);
 
     /* ---------------------------------------------------------------------------------------*/
-    
 }
 
 void ButtonUp(int face, int lednum)
@@ -53,4 +52,44 @@ void ButtonLongpress(int face, int lednum)
 
 
     /* ---------------------------------------------------------------------------------------*/
+}
+
+void pressButtonsAutomatically(Coroutine *coroutine) {
+    BEGIN_COROUTINE(coroutine);
+
+    ButtonDown(2, 3);
+    WAIT_FOR_SECONDS(coroutine, 5);
+
+    ButtonDown(8, 3);
+    WAIT_FOR_SECONDS(coroutine, 5);
+
+    ButtonDown(2, 3);
+    WAIT_FOR_SECONDS(coroutine, 5);
+
+    END_COROUTINE();
+}
+
+// Called Before the First Update (Just Once)
+void Start()
+{
+    // Cube Color Initiate
+    for(int face=0; face<6; face++) {
+        for(int lednum=0; lednum<9; lednum++) {
+            SetColor(face, lednum, MakeColor(0, 0, 0));
+        }
+    }
+    ChangeColorImm();
+    StartCoroutine(pressButtonsAutomatically);
+}
+
+// Called For Every Timing Sequence
+void Update()
+{   
+    
+    for(int face=0; face<6; face++) {
+        for(int lednum=0; lednum<9; lednum++) {
+            SetColor(face, lednum, MakeRandomColor());
+        }
+    }
+    
 }
