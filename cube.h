@@ -38,6 +38,10 @@ LED *GetOppositeLED(int face, int lednum);
 Color MakeRandomColor();
 Color MakeColor(int r, int g, int b);
 
+
+// 색깔을 즉시 바꾼다.
+void ChangeColorImm();
+
 // 코루틴 함수: StartCoroutine(FadeColor) 로 호출
 // 코루틴 호출한 시점에서 비동기적으로 Fade 처리된다.
 void FadeColor(Coroutine* coroutine);
@@ -47,3 +51,6 @@ void FadeColor(Coroutine* coroutine);
 void ButtonDown(int face, int lednum);
 void ButtonUp(int face, int lednum);
 void ButtonLongpress(int face, int lednum);
+
+void Start();
+void Update();
