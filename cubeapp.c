@@ -3,93 +3,58 @@
 
 void ButtonDown(int face, int lednum)
 {
-    /* ---------- 여기에 몇 번 face의 몇 번 버튼이 눌렸을 때 어떤 동작을 수행할지를 기술 ----------*/
+    /* ---------- 여기에 몇 번 face의 몇 번 버튼이 눌렸을 때 어떤 동작을 수행할지를 작성 ----------*/
 
     // 버튼 기준 상하좌우 십자 모양으로 LED 토글하는 애플리케이션
-    if(GetColor(face, lednum).r == 0 && GetColor(face, lednum).g == 0 && GetColor(face, lednum).b == 0)
-        SetColor(face, lednum, MakeRandomColor());
-    else SetColor(face, lednum, MakeColor(0, 0, 0));
-    for (int i = 0; i < 4; i++)
+    int newface = face;
+    int newlednum = lednum;
+    for (int i = -1; i < 4; i++)
     {
-        LED *led = GetDirLED(face, lednum, i);
-        if(led->color.r == 0 && led->color.g == 0 && led->color.b == 0)
-            SetColor(led->face, led->lednum, MakeRandomColor());
-        else SetColor(led->face, led->lednum, MakeColor(0, 0, 0));
+        Color color = i != -1 ? GetDirLED(face, lednum, &newface, &newlednum, i) : GetColor(face, lednum);
+        if(color.r == 0 && color.g == 0 && color.b == 0)
+            SetColor(newface, newlednum, MakeRandomColor());
+        else SetColor(newface, newlednum, MakeColor(0, 0, 0));
+        StartFadeColorCoroutine(FadeColor, newface, newlednum, 4000);
     }
-    StartCoroutine(FadeColor);
+
+    // 눌린 버튼 색을 무작위로 바꾸는 애플리케이션
+    // SetColor(face, lednum, MakeRandomColor());
+    // StartFadeColorCoroutine(FadeColor, face, lednum, 5000);
 
     /* ---------------------------------------------------------------------------------------*/
 }
 
 void ButtonUp(int face, int lednum)
 {
-    // if (face == 0 && lednum == 4) prepareMenu = 0;
-
-    /* --------- 여기에 몇 번 face의 몇 번 버튼이 떼어졌을 때 어떤 동작을 수행할지를 기술 ---------*/
+    /* --------- 여기에 몇 번 face의 몇 번 버튼이 떼어졌을 때 어떤 동작을 수행할지를 작성 ---------*/
 
 
 
     /* ---------------------------------------------------------------------------------------*/
 }
 
-void ButtonLongpress(int face, int lednum)
-{
-    // Goto Menu
-    /*
-    if(face == 0 && lednum == 4)
-    {
-        if (!prepareMenu)
-        {
-            prepareMenu = 1;
-            ledCtrl[0, 4].StartTimer();
-        }
-        else CubeMenu();
-    }
-    */
-
-    /* ------- 여기에 몇 번 face의 몇 번 버튼이 길게 눌렸을 때 어떤 동작을 수행할지를 기술 --------*/
-
-
-
-    /* ---------------------------------------------------------------------------------------*/
-}
-
+// Button Input을 여기에 구현
 void pressButtonsAutomatically(Coroutine *coroutine) {
     BEGIN_COROUTINE(coroutine);
 
-    ButtonDown(2, 3);
-    WAIT_FOR_SECONDS(coroutine, 5);
+    // 마구잡이로 아무 버튼이나 클릭하는 무한루프...
+    while (1) {
+        ButtonDown(random() % 6, random() % 9);
+        WAIT_FOR_MILISEC(coroutine, 4000);
+    }
 
-    ButtonDown(8, 3);
-    WAIT_FOR_SECONDS(coroutine, 5);
-
-    ButtonDown(2, 3);
-    WAIT_FOR_SECONDS(coroutine, 5);
-
-    END_COROUTINE();
+    END_COROUTINE(coroutine);
 }
 
-// Called Before the First Update (Just Once)
+// 프로그램이 시작되면 최초 한 번 실행된다.
 void Start()
 {
-    // Cube Color Initiate
-    for(int face=0; face<6; face++) {
-        for(int lednum=0; lednum<9; lednum++) {
-            SetColor(face, lednum, MakeColor(0, 0, 0));
-        }
-    }
-    ChangeColorImm();
+    CubeInit();
     StartCoroutine(pressButtonsAutomatically);
 }
 
-// Called For Every Timing Sequence
+// 매 Timing Sequence (deltaTime ms) 마다 실행된다.
 void Update()
-{   
-    
-    for(int face=0; face<6; face++) {
-        for(int lednum=0; lednum<9; lednum++) {
-            SetColor(face, lednum, MakeRandomColor());
-        }
-    }
-    
+{
+
 }

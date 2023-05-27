@@ -1,9 +1,6 @@
 #include "coroutine.h"
 #include "cube.h"
 
-float fadeduration = 0.5f;
-float longpressduration = 2.0f;
-
 int diroffset[4] = { -3, +1, +3, -1 };
 
 int dirfaces[6][4] =
@@ -25,81 +22,60 @@ int rotmat[4][9] = {
 
 /* ========== Global Variables (Just used in this file) ========== */
 
-LED led[6][9];
-LED currled[6][9];
-LED prevled[6][9];
+Color new[6][9];
+Color curr[6][9];
 
 /* =============================================================== */
 
 Color GetColor(int face, int lednum) {
-    return led[face][lednum].color;
+    return new[face][lednum];
 }
 
 void SetColor(int face, int lednum, Color newcolor) {
-    prevled[face][lednum].color.r = led[face][lednum].color.r;
-    prevled[face][lednum].color.g = led[face][lednum].color.g;
-    prevled[face][lednum].color.b = led[face][lednum].color.b;
-
-    led[face][lednum].color.r = newcolor.r;
-    led[face][lednum].color.g = newcolor.g;
-    led[face][lednum].color.b = newcolor.b;
+    new[face][lednum] = newcolor;
 }
 
 // dir: up 0, right 1, down 2, left 3
-LED *GetDirLED(int face, int lednum, int dir)
-{
-    int newlednum;
-    int newface;
-
-    newlednum = lednum + diroffset[dir];
+Color GetDirLED(int face, int lednum, int *newface, int *newlednum, int dir) {
+    *newlednum = lednum + diroffset[dir];
 
     // out of face
-    if (newlednum < 0 || newlednum >= 9 || (dir % 2 == 1 && (newlednum / 3 != lednum / 3)))
+    if (*newlednum < 0 || *newlednum >= 9 || (dir % 2 == 1 && (*newlednum / 3 != lednum / 3)))
     {
-        newface = dirfaces[face][dir] % 6;
-        newlednum = (newlednum - 3*diroffset[dir] + 9) % 9;
+        *newface = dirfaces[face][dir] % 6;
+        *newlednum = (*newlednum - 3 * diroffset[dir] + 9) % 9;
 
         // clockwise 90 deg rotation repitition
         int rotamount = dirfaces[face][dir] / 6;
-        newlednum = rotmat[rotamount][newlednum];
+        *newlednum = rotmat[rotamount][*newlednum];
     }
     // not out of face
-    else newface = face;
+    else *newface = face;
 
-    return (led[newface] + newlednum);
+    return new[*newface][*newlednum];
 }
 
-LED *GetDirLEDwithDist(int face, int lednum, int dir, int dist)
-{
+Color GetDirLEDwithDist(int face, int lednum, int *newface, int *newlednum, int dir, int dist) {
     int distleft = dist;
-    LED *currLED = (led[face] + lednum);
+    Color temp = new[face][lednum];
 
     while(distleft != 0)
     {
-        currLED = GetDirLED(face, lednum, dir);
+        temp = GetDirLED(face, lednum, newface, newlednum, dir);
         distleft = distleft > 0 ? distleft - 1 : distleft + 1;
     }
 
-    return currLED;
+    return new[*newface][*newlednum];
 }
 
-LED *GetOppositeLED(int face, int lednum)
-{
-    LED *retLED = (led[face] + lednum);
-    if      (lednum  < 3) retLED = GetDirLEDwithDist(face, lednum, 0, 4);
-    else if (lednum == 3) retLED = GetDirLEDwithDist(face, lednum, 3, 4);
-    else if (lednum == 4) retLED = GetDirLEDwithDist(face, lednum, 0, 6);
-    else if (lednum == 5) retLED = GetDirLEDwithDist(face, lednum, 1, 4);
-    else if (lednum  < 9) retLED = GetDirLEDwithDist(face, lednum, 2, 4);
-    return retLED;
-}
-
-Color MakeRandomColor() {
-    Color color;
-    color.r = rand() % 256;
-    color.g = rand() % 256;
-    color.b = rand() % 256;
-    return color;
+Color GetOppositeLED(int face, int lednum, int *newface, int *newlednum) {
+    Color ret = new[face][lednum];
+    if      (lednum  < 3) ret = GetDirLEDwithDist(face, lednum, newface, newlednum, 0, 4);
+    else if (lednum == 3) ret = GetDirLEDwithDist(face, lednum, newface, newlednum, 3, 4);
+    else if (lednum == 4) ret = GetDirLEDwithDist(face, lednum, newface, newlednum, 0, 6);
+    else if (lednum == 5) ret = GetDirLEDwithDist(face, lednum, newface, newlednum, 1, 4);
+    else if (lednum  < 9) ret = GetDirLEDwithDist(face, lednum, newface, newlednum, 2, 4);
+    return ret;
 }
 
 Color MakeColor(int r, int g, int b) {
@@ -107,36 +83,49 @@ Color MakeColor(int r, int g, int b) {
     return color;
 }
 
+Color MakeRandomColor() {
+    Color color;
+    color.r = 50 + rand() % 206;
+    color.g = 50 + rand() % 206;
+    color.b = 50 + rand() % 206;
+    return color;
+}
+
+void FadeColor(Coroutine* coroutine) {
+    BEGIN_COROUTINE(coroutine);
+
+    coroutine->processms = 0;
+    coroutine->startcolor = curr[coroutine->face][coroutine->lednum];
+
+    // run process
+    while (coroutine->processms < coroutine->durationms)
+    {
+        curr[coroutine->face][coroutine->lednum].r = (int)(coroutine->startcolor.r + ((float)coroutine->processms/coroutine->durationms) * (new[coroutine->face][coroutine->lednum].r - coroutine->startcolor.r));
+        curr[coroutine->face][coroutine->lednum].g = (int)(coroutine->startcolor.g + ((float)coroutine->processms/coroutine->durationms) * (new[coroutine->face][coroutine->lednum].g - coroutine->startcolor.g));
+        curr[coroutine->face][coroutine->lednum].b = (int)(coroutine->startcolor.b + ((float)coroutine->processms/coroutine->durationms) * (new[coroutine->face][coroutine->lednum].b - coroutine->startcolor.b));
+        coroutine->processms += deltaTime;
+        YIELD(coroutine);
+    }
+
+    END_COROUTINE(coroutine);
+}
+
 void ChangeColorImm() {
     for(int face=0; face<6; face++) {
         for(int lednum=0; lednum<9; lednum++) {
-            currled[face][lednum].color.r = led[face][lednum].color.r;
-            currled[face][lednum].color.g = led[face][lednum].color.g;
-            currled[face][lednum].color.b = led[face][lednum].color.b;
+            curr[face][lednum].r = new[face][lednum].r;
+            curr[face][lednum].g = new[face][lednum].g;
+            curr[face][lednum].b = new[face][lednum].b;
         }
     }
 }
 
-void FadeColor(Coroutine* coroutine) {
-    float step = deltaTime / fadeduration; // The amount of change to apply.
-    float colorprocess = 0.0f;
-    static int face;
-    static int lednum;
+void CubeInit() {
+    // Cube Color Initiate
+    memset(new, 0, sizeof(Color) * 6*9);
+    memset(curr, 0, sizeof(Color) * 6*9);
+}
 
-    BEGIN_COROUTINE(coroutine);
-
-    while (colorprocess < 1)
-    {
-        for(face=0; face<6; face++) {
-            for(lednum=0; lednum<9; lednum++) {
-                currled[face][lednum].color.r = (int)(prevled[face][lednum].color.r + colorprocess * (led[face][lednum].color.r - prevled[face][lednum].color.r));
-                currled[face][lednum].color.g = (int)(prevled[face][lednum].color.g + colorprocess * (led[face][lednum].color.g - prevled[face][lednum].color.g));
-                currled[face][lednum].color.b = (int)(prevled[face][lednum].color.b + colorprocess * (led[face][lednum].color.b - prevled[face][lednum].color.b));
-                colorprocess += step;
-                YIELD(coroutine);
-            }
-        }
-    }
-
-    END_COROUTINE();
+Color GetCurrColor(int face, int lednum) {
+    return curr[face][lednum];
 }

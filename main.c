@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include "coroutine.h"
 #include "cube.h"
@@ -11,22 +10,23 @@ bool buttonprevState[6*9];
 // Implement Terminal Output
 void TerminalOutput() {
     system("clear");
+    printf("\n");
     int face = 4;
     for(int lednum=0; lednum<9; lednum++) {
-        LED *led = GetDirLED(face, lednum, 4);
+        Color ledcolor = GetCurrColor(face, lednum);
         // Set text color using RGB values
         printf("\033[38;2;%d;%d;%dm%s\033[0m", 
-            led->color.r, led->color.g, led->color.b, "■");
+            ledcolor.r, ledcolor.g, ledcolor.b, "■");
         if(lednum % 3 == 2) printf("\n");
     }
     printf("\n");
     face = 0;
     int lednum = 0;
     while(lednum < 9) {
-        LED *led = GetDirLED(face, lednum, 4);
+        Color ledcolor = GetCurrColor(face, lednum);
         // Set text color using RGB values
         printf("\033[38;2;%d;%d;%dm%s\033[0m", 
-            led->color.r, led->color.g, led->color.b, "■");
+            ledcolor.r, ledcolor.g, ledcolor.b, "■");
         if(lednum % 3 == 2) {
             if(face == 3) {
                 printf("\n");
@@ -44,10 +44,10 @@ void TerminalOutput() {
     printf("\n");
     face = 5;
     for(int lednum=0; lednum<9; lednum++) {
-        LED *led = GetDirLED(face, lednum, 4);
+        Color ledcolor = GetCurrColor(face, lednum);
         // Set text color using RGB values
         printf("\033[38;2;%d;%d;%dm%s\033[0m", 
-            led->color.r, led->color.g, led->color.b, "■");
+            ledcolor.r, ledcolor.g, ledcolor.b, "■");
         if(lednum % 3 == 2) printf("\n");
     }
 }
@@ -88,7 +88,7 @@ int main() {
         /* ==================================================== */
 
         Update();
-        usleep(deltaTime*100000);
+        usleep(deltaTime*1000);
     }
 
     return 0;
