@@ -3,6 +3,7 @@
 
 int main() {
     StartCubeRoutine();
+    SetColor(1,1,MakeColor(100,100,100));
     return 0;
 }
 
@@ -17,10 +18,11 @@ void ButtonDown(int face, int lednum)
     {
         Color color = i != -1 ? GetDirLED(face, lednum, &newface, &newlednum, i) : GetColor(face, lednum);
         if(color.r == 0 && color.g == 0 && color.b == 0)
-            SetColor(newface, newlednum, MakeRandomColor());
+            SetColor(newface, newlednum, MakeColor(255,255,255));
         else SetColor(newface, newlednum, MakeColor(0, 0, 0));
-        StartFadeColorCoroutine(FadeColor, newface, newlednum, 4000);
-    }
+        ChangeColorImm();
+        // StartFadeColorCoroutine(FadeColor, newface, newlednum, 4000);
+    
 
     // 눌린 버튼 색을 무작위로 바꾸는 애플리케이션
     // SetColor(face, lednum, MakeRandomColor());
@@ -45,7 +47,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
     // 마구잡이로 아무 버튼이나 클릭하는 무한루프...
     while (1) {
         ButtonDown(rand() % 6, rand() % 9);
-        WAIT_FOR_MILISEC(coroutine, 4000);
+        WAIT_FOR_MILISEC(coroutine, 10000);
     }
 
     END_COROUTINE(coroutine);
@@ -60,5 +62,5 @@ void Start()
 // 매 Timing Sequence (deltaTime ms) 마다 실행된다.
 void Update()
 {
-
+    int a;
 }
