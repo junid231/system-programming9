@@ -78,6 +78,14 @@ void Update()
     //     *saved=input;
     // }
     int tmp=getch();
+    if (tmp==-1){
+
+        printf("same");
+    }
+    else{
+        saved=tmp;
+    }
+    printf("last : %c",saved);
     printf("%d",tmp);
 
 }
