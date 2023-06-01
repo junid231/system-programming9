@@ -26,7 +26,7 @@ void ButtonDown(int face, int lednum)
     /* ---------- 여기에 몇 번 face의 몇 번 버튼이 눌렸을 때 어떤 동작을 수행할지를 작성 ----------*/
 
     // 버튼 기준 상하좌우 십자 모양으로 LED 토글하는 애플리케이션
-    srand((unsigned int)time(NULL));
+    
     int num=rand()%6;
     Color now;
     switch (rand()%3)
@@ -127,6 +127,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 void Start()
 {
     StartCoroutine(pressButtonsAutomatically);
+    srand((unsigned int)time(NULL));
 }
 
 // 매 Timing Sequence (deltaTime ms) 마다 실행된다.
