@@ -1,5 +1,7 @@
 #include "./libcube/coroutine.h"
 #include "./libcube/cube.h"
+#include <stdio.h>
+#include <curses.h>
 
 int main() {
     StartCubeRoutine();
@@ -20,8 +22,9 @@ void ButtonDown(int face, int lednum)
         if(color.r == 0 && color.g == 0 && color.b == 0)
             SetColor(newface, newlednum, MakeColor(255,255,255));
         else SetColor(newface, newlednum, MakeColor(0, 0, 0));
-        ChangeColorImm();
-        // StartFadeColorCoroutine(FadeColor, newface, newlednum, 4000);
+        // ChangeColorImm();
+        StartFadeColorCoroutine(FadeColor, newface, newlednum, 1001);
+    }
     
 
     // 눌린 버튼 색을 무작위로 바꾸는 애플리케이션
@@ -47,7 +50,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
     // 마구잡이로 아무 버튼이나 클릭하는 무한루프...
     while (1) {
         ButtonDown(rand() % 6, rand() % 9);
-        WAIT_FOR_MILISEC(coroutine, 10000);
+        WAIT_FOR_MILISEC(coroutine, 500);
     }
 
     END_COROUTINE(coroutine);
@@ -60,7 +63,21 @@ void Start()
 }
 
 // 매 Timing Sequence (deltaTime ms) 마다 실행된다.
+// char saved[32];
+int saved;
 void Update()
 {
-    int a;
+    // char input[32];
+    // gets(input);
+    // if(strcmp(input, "")==0){
+    //     printf("same");
+    //     printf(saved);
+    // }
+    // else{
+    //     printf(input);
+    //     *saved=input;
+    // }
+    int tmp=getch();
+    printf("%d",tmp);
+
 }

@@ -58,6 +58,7 @@
         "xutility": "cpp",
         "*.tcc": "cpp",
         "timeb.h": "c",
-        "coroutine.h": "c"
+        "coroutine.h": "c",
+        "cube.h": "c"
     }
 }

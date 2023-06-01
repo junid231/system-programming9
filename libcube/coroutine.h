@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define MAX_COROUTINES 60
-#define deltaTime 1000       // 1 cycle == deltaTime ms
+#define deltaTime 500    // 1 cycle == deltaTime ms
 
 typedef struct {
     int r;
