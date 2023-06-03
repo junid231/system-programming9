@@ -8,10 +8,10 @@ OBJECTS = $(SOURCES:.c=.o)
 all: $(LIBRARY)
 
 $(LIBRARY): $(OBJECTS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LIBRARY) $(OBJECTS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LIBRARY) $(OBJECTS) -lwiringPi
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ -lwiringPi
 
 clean:
 	rm -f $(OBJECTS)
