@@ -3,6 +3,7 @@
 
 int main() {
     StartCubeRoutine();
+    SetColor(1,1,MakeColor(100,100,100));
     return 0;
 }
 
@@ -65,5 +66,5 @@ void Start()
 // 매 Timing Sequence (deltaTime ms) 마다 실행된다.
 void Update()
 {
-
+    int a;
 }
