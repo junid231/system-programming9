@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # main.c 파일
-
+#./build.sh 파일이름
+# 파일이름.c를 파일이름으로 컴파일함
 FILE_NAME="main"
 if [ $# -eq 1 ]
 then
@@ -10,7 +11,7 @@ fi
 MAIN_FILE=$FILE_NAME.c
 echo $MAIN_FILE
 # 실행 파일 이름
-OUTPUT_FILE=runcube
+OUTPUT_FILE=$FILE_NAME
 # 컴파일러 옵션
 CFLAGS="-Wall -Wextra -std=c99"
 # 라이브러리 링크 옵션
