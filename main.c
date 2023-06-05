@@ -11,20 +11,25 @@ void ButtonDown(int face, int lednum)
     /* ---------- 여기에 몇 번 face의 몇 번 버튼이 눌렸을 때 어떤 동작을 수행할지를 작성 ----------*/
 
     // 버튼 기준 상하좌우 십자 모양으로 LED 토글하는 애플리케이션
-    int newface = face;
-    int newlednum = lednum;
-    for (int i = -1; i < 4; i++)
-    {
-        Color color = i != -1 ? GetDirLED(face, lednum, &newface, &newlednum, i) : GetColor(face, lednum);
-        if(color.r == 0 && color.g == 0 && color.b == 0)
-            SetColor(newface, newlednum, MakeRandomColor());
-        else SetColor(newface, newlednum, MakeColor(0, 0, 0));
-        StartFadeColorCoroutine(FadeColor, newface, newlednum, 4000);
-    }
+    // int newface = face;
+    // int newlednum = lednum;
+    // for (int i = -1; i < 4; i++)
+    // {
+    //     Color color = i != -1 ? GetDirLED(face, lednum, &newface, &newlednum, i) : GetColor(face, lednum);
+    //     if(color.r == 0 && color.g == 0 && color.b == 0)
+    //         SetColor(newface, newlednum, MakeRandomColor());
+    //     else SetColor(newface, newlednum, MakeColor(0, 0, 0));
+    //     StartFadeColorCoroutine(FadeColor, newface, newlednum, 1000);
+    // }
 
     // 눌린 버튼 색을 무작위로 바꾸는 애플리케이션
-    // SetColor(face, lednum, MakeRandomColor());
-    // StartFadeColorCoroutine(FadeColor, face, lednum, 5000);
+    Color color;
+    int choice = rand() % 3;
+    color.r = choice == 0 ? 255 : 0;
+    color.g = choice == 1 ? 255 : 0;
+    color.b = choice == 2 ? 255 : 0;
+    SetColor(face, lednum, color);
+    StartFadeColorCoroutine(FadeColor, face, lednum, 3000);
 
     /* ---------------------------------------------------------------------------------------*/
 }
@@ -45,7 +50,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
     // 마구잡이로 아무 버튼이나 클릭하는 무한루프...
     while (1) {
         ButtonDown(rand() % 6, rand() % 9);
-        WAIT_FOR_MILISEC(coroutine, 4000);
+        WAIT_FOR_MILISEC(coroutine, 1000);
     }
 
     END_COROUTINE(coroutine);
@@ -54,7 +59,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 // 프로그램이 시작되면 최초 한 번 실행된다.
 void Start()
 {
-    StartCoroutine(pressButtonsAutomatically);
+    // StartCoroutine(pressButtonsAutomatically);
 }
 
 // 매 Timing Sequence (deltaTime ms) 마다 실행된다.

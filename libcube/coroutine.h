@@ -4,7 +4,7 @@
 #include <time.h>
 
 #define MAX_COROUTINES 60
-#define deltaTime 60       // 1 cycle == deltaTime ms
+#define deltaTime 50       // 1 cycle == deltaTime ms
 
 typedef struct {
     int r;
@@ -24,6 +24,8 @@ typedef struct {
     int durationms;
     int processms;
     Color startcolor;
+    // tone parameters
+    int level;
 } Coroutine;
 
 typedef void (*CoroutineFunction)(Coroutine*);
