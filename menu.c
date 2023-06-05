@@ -12,15 +12,19 @@ int main() {
 
     return 0;
 }
-
+int mode=1;
 void ButtonDown(int face, int lednum)
 {
+    if (mode==0){
+        exit(0);
+    }
     SetColor(0, 2, MakeRandomColor());
     ChangeColorImm();
     if(face==0 &&lednum==7){
-        void CubeInit();
+        CubeInit();
         ChangeColorImm();
-        exit(333);
+        mode=0;
+        // exit(333);
     }
     if(face==0 &&lednum==4){
             pid_t pid =fork();
@@ -76,21 +80,21 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 // 프로그램이 시작되면 최초 한 번 실행된다.
 void Start()
 {
-    pid_t pid =fork();
-    int childstat;
-    if(pid==0){
-        execl("/home/chek/syspro/system-programming9/dicetest","dicetest",NULL);
-        // printf("child\n");
-        exit(1234);
+    // pid_t pid =fork();
+    // int childstat;
+    // if(pid==0){
+    //     execl("/home/chek/syspro/system-programming9/dicetest","dicetest",NULL);
+    //     // printf("child\n");
+    //     exit(1234);
 
-    }
-    else{
-        wait(&childstat);
-        printf("%d  child end\n",childstat);
-        printf("%d \n",WEXITSTATUS(childstat));
-        printf("this is the parae\n");
-        // exit(123);
-    }
+    // }
+    // else{
+    //     wait(&childstat);
+    //     printf("%d  child end\n",childstat);
+    //     printf("%d \n",WEXITSTATUS(childstat));
+    //     printf("this is the parae\n");
+    //     // exit(123);
+    // }
     // StartCoroutine(pressButtonsAutomatically);
 }
 
