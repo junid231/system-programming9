@@ -117,7 +117,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
     // 마구잡이로 아무 버튼이나 클릭하는 무한루프...
     while (1) {
         ButtonDown(rand() % 6, rand() % 9);
-        WAIT_FOR_MILISEC(coroutine, 30000);
+        WAIT_FOR_MILISEC(coroutine, 1000);
     }
 
     END_COROUTINE(coroutine);
@@ -126,7 +126,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 // 프로그램이 시작되면 최초 한 번 실행된다.
 void Start()
 {
-    StartCoroutine(pressButtonsAutomatically);
+    // StartCoroutine(pressButtonsAutomatically);
     srand((unsigned int)time(NULL));
 }
 
