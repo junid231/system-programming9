@@ -2,14 +2,73 @@
 #include "./libcube/cube.h"
 
 #include <time.h>
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+
+//for get input
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
+#include <signal.h>
+
+#include <stdlib.h>
+
+void* ptr;
+const char* name = "input";
+
+void int_handler(int sig)
+{
+    int buf[6]={0,0,0,0,0,0};
+    printf("Process %d received signal %d\n", getpid(), sig);
+    memcpy(buf,ptr,sizeof(int)*4);
+    ButtonDown(buf[1],buf[2]);
+    printf("button pushed %d %d",buf[1],buf[2]);
+    buf[0]=getpid();
+    memcpy(ptr,buf,sizeof(int)*4);
+}
+
+void getinput(){
+    int buf[6]={0,0,0,0,0,0};
+    buf[0]=getpid();
+    signal(SIGUSR1,int_handler);
+    /* the size (in bytes) of shared memory object */
+    const int SIZE = sizeof(int)*10;
+    /* name of the shared memory object */
+    int shm_fd;
+    shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+    //init the memory
+    ftruncate(shm_fd, SIZE);
+    /* memory map the shared memory object */
+    ptr = mmap(0, SIZE,  PROT_READ|PROT_WRITE,MAP_SHARED, shm_fd, 0);
+    memcpy(ptr,buf,sizeof(int)*2);
+
+
+    // memcpy(ptr,buf,sizeof(int)*2);
+
+    // munmap(ptr,SIZE);
+    // ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+    
+}
+
 int main() {
+        printf("dsfasf\n\n\asdfdsaf\na\sdfasdsfsadf\nsdafnasd\n\n");
+        sleep(3);
     StartCubeRoutine();
-    SetColor(1,1,MakeColor(100,100,100));
-    SetColor(1,4,MakeColor(100,0,0));
-    SetColor(1,5,MakeColor(100,0,0));
-    SetColor(1,6,MakeColor(100,0,0));
-    ChangeColorImm();
-    sleep(5);
+    // SetColor(1,1,MakeColor(100,100,100));
+    // SetColor(1,4,MakeColor(100,0,0));
+    // SetColor(1,5,MakeColor(100,0,0));
+    // SetColor(1,6,MakeColor(100,0,0));
+    // ChangeColorImm();
+    // sleep(5);
 
     return 0;
 }
@@ -135,6 +194,9 @@ void Start()
 {
     // StartCoroutine(pressButtonsAutomatically);
     srand((unsigned int)time(NULL));
+    printf("3323fdsafasdfasdfsdfas\n\n\ndfsa\n");
+    sleep(5);
+    getinput();
 }
 
 // 매 Timing Sequence (deltaTime ms) 마다 실행된다.

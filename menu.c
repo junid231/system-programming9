@@ -20,18 +20,22 @@
 
 #include <stdlib.h>
 
-int buf[6]={0,0,0,0,0,0};
+
 void* ptr;
 const char* name = "input";
 
 void int_handler(int sig)
 {
+    int buf[6]={0,0,0,0,0,0};
     printf("Process %d received signal %d\n", getpid(), sig);
     memcpy(buf,ptr,sizeof(int)*4);
     ButtonDown(buf[1],buf[2]);
-    
+    printf("button pushed %d %d",buf[1],buf[2]);
+    buf[0]=getpid();
+    memcpy(ptr,buf,sizeof(int)*4);
 }
 void getinput(){
+    int buf[6]={0,0,0,0,0,0};
     buf[0]=getpid();
     signal(SIGUSR1,int_handler);
     /* the size (in bytes) of shared memory object */
@@ -45,8 +49,11 @@ void getinput(){
     ptr = mmap(0, SIZE,  PROT_READ|PROT_WRITE,MAP_SHARED, shm_fd, 0);
     memcpy(ptr,buf,sizeof(int)*2);
 
-    // munmap(ptr,SIZE);
-    // ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+
+    //// memcpy(ptr,buf,sizeof(int)*2);
+
+    //// munmap(ptr,SIZE);
+    // //ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
     
 }
 
@@ -54,6 +61,7 @@ void getinput(){
 
 int main() {
     
+
     StartCubeRoutine();
     SetColor(1,1,MakeColor(100,100,100));
 
@@ -84,6 +92,9 @@ void ButtonDown(int face, int lednum)
 
     }
     else{
+        int buf[6]={0,0,0,0,0,0};
+        buf[0]=pid;
+        memcpy(ptr,buf,sizeof(int)*2);
         wait(&childstat);
         printf("%d  child end\n",childstat);
         printf("%d \n",WEXITSTATUS(childstat));

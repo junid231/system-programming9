@@ -12,21 +12,28 @@
 #include <signal.h>
 
 #include <stdlib.h>
-
+void* ptr;
 static int times=0;
+/* the size (in bytes) of shared memory object */
+const int SIZE = sizeof(int)*10;
+
+/* name of the shared memory object */
+const char* name = "input";
+void int_handler(int sig)
+{
+    shm_unlink(name);
+    printf("Communication fail\n");
+    exit(0);
+}
 int main()
 {
-    /* the size (in bytes) of shared memory object */
-    const int SIZE = sizeof(int)*10;
- 
-    /* name of the shared memory object */
-    const char* name = "input";
+
  
     /* shared memory file descriptor */
     int shm_fd;
  
     /* pointer to shared memory object */
-    void* ptr;
+    
  
     /* create the shared memory object */
     shm_fd = shm_open(name,  O_RDWR, 0666);
@@ -38,9 +45,6 @@ int main()
     /* memory map the shared memory object */
     ptr = mmap(0, SIZE,  PROT_READ|PROT_WRITE, MAP_SHARED, shm_fd, 0);
  
-    /* write to the shared memory object */
-    // sprintf(ptr, "%s", message_0);
-    // sprintf(ptr, "%d", getpid());
     int buf[6]={0,0,0,0,0,0};
     int cubepid=0;
     int state=0;
@@ -63,7 +67,7 @@ int main()
         memcpy(ptr,buf,sizeof(int)*4);
         state=kill(cubepid,SIGUSR1);
         if (state!=0){
-            printf("kill fail\n");
+            printf("kill fail %d\n",state);
         }
         else{
             printf("killed\n");
