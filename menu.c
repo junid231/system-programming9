@@ -6,7 +6,56 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 
+//for get input
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
+#include <signal.h>
+
+#include <stdlib.h>
+
+int buf[6]={0,0,0,0,0,0};
+void* ptr;
+const char* name = "input";
+
+void int_handler(int sig)
+{
+    printf("Process %d received signal %d\n", getpid(), sig);
+    memcpy(buf,ptr,sizeof(int)*4);
+    ButtonDown(buf[1],buf[2]);
+    
+}
+void getinput(){
+    buf[0]=getpid();
+    signal(SIGUSR1,int_handler);
+    /* the size (in bytes) of shared memory object */
+    const int SIZE = sizeof(int)*10;
+ 
+    /* name of the shared memory object */
+    
+    int shm_fd;
+    shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+    //init the memory
+    ftruncate(shm_fd, SIZE);
+    /* memory map the shared memory object */
+    ptr = mmap(0, SIZE,  PROT_READ|PROT_WRITE,MAP_SHARED, shm_fd, 0);
+    memcpy(ptr,buf,sizeof(int)*2);
+
+    // munmap(ptr,SIZE);
+    // ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+    
+}
+
+
+
 int main() {
+    
     StartCubeRoutine();
     SetColor(1,1,MakeColor(100,100,100));
 
@@ -16,6 +65,7 @@ int mode=1;
 void ButtonDown(int face, int lednum)
 {
     if (mode==0){
+        shm_unlink(name);
         exit(0);
     }
     SetColor(0, 2, MakeRandomColor());
@@ -80,6 +130,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 // 프로그램이 시작되면 최초 한 번 실행된다.
 void Start()
 {
+    getinput();
     // pid_t pid =fork();
     // int childstat;
     // if(pid==0){
