@@ -58,10 +58,12 @@ Color GetDirLED(int face, int lednum, int *newface, int *newlednum, int dir) {
 Color GetDirLEDwithDist(int face, int lednum, int *newface, int *newlednum, int dir, int dist) {
     int distleft = dist;
     Color temp = new[face][lednum];
+    *newface = face;
+    *newlednum = lednum;
 
     while(distleft != 0)
     {
-        temp = GetDirLED(face, lednum, newface, newlednum, dir);
+        temp = GetDirLED(*newface, *newlednum, newface, newlednum, dir);
         distleft = distleft > 0 ? distleft - 1 : distleft + 1;
     }
 
@@ -98,7 +100,7 @@ void FadeColor(Coroutine* coroutine) {
     coroutine->startcolor = curr[coroutine->face][coroutine->lednum];
 
     // run process
-    while (coroutine->processms <= coroutine->durationms)
+    while (coroutine->processms < coroutine->durationms)
     {
         curr[coroutine->face][coroutine->lednum].r = (int)(coroutine->startcolor.r + ((float)coroutine->processms/coroutine->durationms) * (new[coroutine->face][coroutine->lednum].r - coroutine->startcolor.r));
         curr[coroutine->face][coroutine->lednum].g = (int)(coroutine->startcolor.g + ((float)coroutine->processms/coroutine->durationms) * (new[coroutine->face][coroutine->lednum].g - coroutine->startcolor.g));
