@@ -42,17 +42,33 @@ int main()
     // sprintf(ptr, "%s", message_0);
     // sprintf(ptr, "%d", getpid());
     int buf[6]={0,0,0,0,0,0};
+    int cubepid=0;
+    int state=0;
     while(1){
         int a,b;
         scanf("%d %d",&a,&b);
-        prinf("input %d %d",a,b)
-        
+        printf("input %d %d",a,b);
+        memcpy(buf,ptr,sizeof(int)*4);
+        cubepid=buf[0];
+        if(cubepid==0){
+            printf("cubepid error");
+            shm_unlink(name);
+        }
+        else{
+            printf("cube pid is %d",cubepid);
+        }
+        buf[0]=0;
+        buf[1]=a;
+        buf[2]=b;
+        memcpy(ptr,buf,sizeof(int)*4);
+        state=kill(cubepid,SIGUSR1);
+        if (state!=0){
+            printf("kill fail\n");
+        }
+        else{
+            printf("killed\n");
+        }
+
     }
-    // memcpy(ptr,buf,sizeof(int)*4);
-    // printf("producer pid %d\n",getgid());
-    // while(1){
-    //     printf("prodsleep\n");
-    //     sleep(10);
-    // }
     return 0;
 }

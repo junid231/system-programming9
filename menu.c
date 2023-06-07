@@ -36,9 +36,7 @@ void getinput(){
     signal(SIGUSR1,int_handler);
     /* the size (in bytes) of shared memory object */
     const int SIZE = sizeof(int)*10;
- 
     /* name of the shared memory object */
-    
     int shm_fd;
     shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
     //init the memory

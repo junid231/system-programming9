@@ -13,9 +13,9 @@ echo $MAIN_FILE
 # 실행 파일 이름
 OUTPUT_FILE=$FILE_NAME
 # 컴파일러 옵션
-CFLAGS="-Wall -Wextra -std=c99"
+CFLAGS="-Wall -Wextra -std=gnu99"
 # 라이브러리 링크 옵션
-LDFLAGS="-L./libcube -lcube"
+LDFLAGS="-L./libcube -lcube -lrt"
 
 # main.c를 빌드
 gcc $CFLAGS -c $MAIN_FILE -o $FILE_NAME.o

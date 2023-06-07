@@ -98,7 +98,7 @@ void FadeColor(Coroutine* coroutine) {
     coroutine->startcolor = curr[coroutine->face][coroutine->lednum];
 
     // run process
-    while (coroutine->processms < coroutine->durationms)
+    while (coroutine->processms <= coroutine->durationms)
     {
         curr[coroutine->face][coroutine->lednum].r = (int)(coroutine->startcolor.r + ((float)coroutine->processms/coroutine->durationms) * (new[coroutine->face][coroutine->lednum].r - coroutine->startcolor.r));
         curr[coroutine->face][coroutine->lednum].g = (int)(coroutine->startcolor.g + ((float)coroutine->processms/coroutine->durationms) * (new[coroutine->face][coroutine->lednum].g - coroutine->startcolor.g));

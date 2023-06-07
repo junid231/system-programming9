@@ -8,7 +8,7 @@ OBJECTS = $(SOURCES:.c=.o)
 all: $(LIBRARY)
 
 $(LIBRARY): $(OBJECTS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LIBRARY) $(OBJECTS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LIBRARY) $(OBJECTS) -L./rpi_ws281x -lws2811 -lwiringPi -fPIC
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
