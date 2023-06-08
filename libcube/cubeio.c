@@ -10,7 +10,7 @@
 
 #include "rpi_ws281x/ws2811.h"
 
-#define LED_COUNT 9
+#define LED_COUNT 18
 #define LED_PIN 18
 
 static ws2811_t ledstring = {
@@ -49,7 +49,7 @@ static ws2811_t ledstring = {
 #define GYRO_YOUT_H  0x45
 #define GYRO_ZOUT_H  0x47
 
-#define NUMBER_OF_SHIFT_CHIPS   2
+#define NUMBER_OF_SHIFT_CHIPS   3
 /* Width of data (how many ext lines). */
 #define DATA_WIDTH   NUMBER_OF_SHIFT_CHIPS * 8
 /* Width of pulse to trigger the shift register to read and latch. */
@@ -161,24 +161,44 @@ short read_raw_data(int addr) {
 	return value;
 }
 
-static const int aMelody[8] = {131,147,165,175,196,220,247,262};
+static const int aMelody[9] = {0,131,147,165,175,196,220,247,262};
 
-void tone(Coroutine *coroutine) {
-    BEGIN_COROUTINE(coroutine);
+void tone(int level) {
+	softToneWrite(pinPiezo, aMelody[level]);
+}
 
-	softToneWrite(pinPiezo, aMelody[coroutine->level]);
-    WAIT_FOR_MILISEC(coroutine, coroutine->waitms);
-    softToneWrite(pinPiezo,0);
+void getGyro(float *Gx, float *Gy, float *Gz) {
+	float Gyro_x,Gyro_y,Gyro_z;
 
-    END_COROUTINE(coroutine);
+    Gyro_x = read_raw_data(GYRO_XOUT_H);
+    Gyro_y = read_raw_data(GYRO_YOUT_H);
+    Gyro_z = read_raw_data(GYRO_ZOUT_H);
+
+    /*Read raw value of Accelerometer and gyroscope from MPU6050*/
+    
+    *Gx = Gyro_x/131;
+    *Gy = Gyro_y/131;
+    *Gz = Gyro_z/131;
+}
+
+void getAccel(float *Ax, float *Ay, float *Az) {
+    float Acc_x,Acc_y,Acc_z;
+
+    Acc_x = read_raw_data(ACCEL_XOUT_H);
+    Acc_y = read_raw_data(ACCEL_YOUT_H);
+    Acc_z = read_raw_data(ACCEL_ZOUT_H);
+
+    /* Divide raw value by sensitivity scale factor */
+
+    *Ax = Acc_x/16384.0;
+    *Ay = Acc_y/16384.0;
+    *Az = Acc_z/16384.0;
 }
 
 void UpdateLED() {
-    int face = 0;
-
-    for(int lednum=0; lednum<9; lednum++) {
-        Color ledcolor = GetCurrColor(face, lednum);
-        ledstring.channel[0].leds[lednum] = (ledcolor.r << 8) | (ledcolor.g << 16) | ledcolor.b;
+    for(int i=0; i<LED_COUNT; i++){
+        Color ledcolor = GetCurrColor(i / 9, i % 9);
+        ledstring.channel[0].leds[i] = (ledcolor.r << 8) | (ledcolor.g << 16) | ledcolor.b;
     }
 
     // Neopixel 업데이트
@@ -200,12 +220,8 @@ void StartCubeRoutine() {
         fprintf(stderr, "ws2811_init failed\n");
     }
 
-    // float Acc_x,Acc_y,Acc_z;
-	// float Gyro_x,Gyro_y,Gyro_z;
-	// float Ax=0, Ay=0, Az=0;
-	// float Gx=0, Gy=0, Gz=0;
-	// fd = wiringPiI2CSetup(Device_Address);   /*Initializes I2C with device Address*/
-	// MPU6050_Init();     /* Initializes MPU6050 */
+	fd = wiringPiI2CSetup(Device_Address);   /*Initializes I2C with device Address*/
+	MPU6050_Init();     /* Initializes MPU6050 */
 
     pinMode(ploadPin, OUTPUT);
     pinMode(clockPin, OUTPUT);
@@ -219,7 +235,6 @@ void StartCubeRoutine() {
     oldPinValues = pinValues;
 
     Start();
-    // tone();
 
     int order[] = {2, 1, 0, 5, 4, 3, 8, 7, 6};
 
@@ -229,7 +244,7 @@ void StartCubeRoutine() {
         pinValues = read_shift_regs();
         pinValues = pinValues;
         if(pinValues != oldPinValues) {
-            // if(pinValues & 0xFF) ButtonDown(0, 8);
+            if(pinValues & 0xFF) ButtonDown(1, 6);
             for(int i = 8; i < DATA_WIDTH; i++) {
                 int face = i / 8 - 1;
                 int lednum = order[i % 8];
@@ -241,26 +256,6 @@ void StartCubeRoutine() {
             oldPinValues = pinValues;
         }
         printf("%llx", pinValues);
-        
-        /*Read raw value of Accelerometer and gyroscope from MPU6050*/
-		// Acc_x = read_raw_data(ACCEL_XOUT_H);
-		// Acc_y = read_raw_data(ACCEL_YOUT_H);
-		// Acc_z = read_raw_data(ACCEL_ZOUT_H);
-		
-		// Gyro_x = read_raw_data(GYRO_XOUT_H);
-		// Gyro_y = read_raw_data(GYRO_YOUT_H);
-		// Gyro_z = read_raw_data(GYRO_ZOUT_H);
-		
-		// /* Divide raw value by sensitivity scale factor */
-		// Ax = Acc_x/16384.0;
-		// Ay = Acc_y/16384.0;
-		// Az = Acc_z/16384.0;
-		
-		// Gx = Gyro_x/131;
-		// Gy = Gyro_y/131;
-		// Gz = Gyro_z/131;
-		
-		// printf("\n Gx=%.3f °/s\tGy=%.3f °/s\tGz=%.3f °/s\tAx=%.3f g\tAy=%.3f g\tAz=%.3f g\n",Gx,Gy,Gz,Ax,Ay,Az);
 
         // Terminal Version
         TerminalOutput();

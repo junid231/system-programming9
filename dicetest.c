@@ -35,6 +35,7 @@ void ButtonDown(int face, int lednum)
         exit(999);
     }
     int num=rand()%6;
+    // tone(3);
     Color now;
     switch (rand()%3)
     {

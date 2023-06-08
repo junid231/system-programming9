@@ -58,10 +58,12 @@ Color GetDirLED(int face, int lednum, int *newface, int *newlednum, int dir) {
 Color GetDirLEDwithDist(int face, int lednum, int *newface, int *newlednum, int dir, int dist) {
     int distleft = dist;
     Color temp = new[face][lednum];
+    *newface = face;
+    *newlednum = newlednum;
 
     while(distleft != 0)
     {
-        temp = GetDirLED(face, lednum, newface, newlednum, dir);
+        temp = GetDirLED(*newface, *newlednum, newface, newlednum, dir);
         distleft = distleft > 0 ? distleft - 1 : distleft + 1;
     }
 
