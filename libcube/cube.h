@@ -10,7 +10,7 @@ lednum: 012
 
 /* =========================== cubeio.c =========================== */
 
-void tone(Coroutine *coroutine);
+void tone(int level);
 void StartCubeRoutine();
 
 /* ========================== cubefunc.c ========================== */

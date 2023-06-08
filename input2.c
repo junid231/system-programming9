@@ -18,7 +18,7 @@ static int times=0;
 const int SIZE = sizeof(int)*10;
 
 /* name of the shared memory object */
-const char* name = "input";
+const char* name = "input2";
 void int_handler(int sig)
 {
     shm_unlink(name);

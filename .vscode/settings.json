@@ -59,6 +59,7 @@
         "*.tcc": "cpp",
         "timeb.h": "c",
         "coroutine.h": "c",
-        "cube.h": "c"
+        "cube.h": "c",
+        "stdlib.h": "c"
     }
 }
