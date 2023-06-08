@@ -21,7 +21,7 @@ LDFLAGS="-L./libcube -lcube -lrt"
 gcc $CFLAGS -c $MAIN_FILE -o $FILE_NAME.o
 
 # main.c와 라이브러리 링크하여 실행 파일 생성
-gcc -o $OUTPUT_FILE $FILE_NAME.o $LDFLAGS -Wl,-rpath='$ORIGIN/libcube'
+gcc -o $OUTPUT_FILE $FILE_NAME.o $LDFLAGS -Wl,-rpath='$ORIGIN/libcube' -lresolv -D_GNU_SOURCE
 
 # 임시 오브젝트 파일 및 실행 파일 제거
 rm -f $FILE_NAME.o

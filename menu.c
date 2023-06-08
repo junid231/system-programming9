@@ -20,6 +20,92 @@
 
 #include <stdlib.h>
 
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
+
+void tongshin(Coroutine *coroutine) {
+    static struct addrinfo hints, *res;
+    static int sockfd, clientfd, status;
+    static char buffer[1024];
+
+    BEGIN_COROUTINE(coroutine);
+
+    // Set up socket parameters
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+    
+    // Resolve the IP address of the local host using getaddrinfo
+    status = getaddrinfo(NULL, "5000", &hints, &res);
+    if (status != 0) {
+        fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
+        exit(1);
+    }
+
+    // Create a socket object and bind it to the local address
+    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (sockfd == -1) {
+        perror("socket error");
+        exit(1);
+    }
+
+    static int reuse = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse);
+
+    status = bind(sockfd, res->ai_addr, res->ai_addrlen);
+    if (status == -1) {
+        perror("bind error");
+        exit(1);
+    }
+
+    // Listen for incoming connections
+    status = listen(sockfd, 1);
+    if (status == -1) {
+        perror("listen error");
+        exit(1);
+    }
+    
+    // printf("Listening on port 5000...\n");
+
+    while (1) {
+        // Accept a new connection
+        clientfd = accept(sockfd, NULL, NULL);
+        if (clientfd == -1) {
+            perror("accept error");
+            continue;
+        }
+        
+        // printf("Accepted connection from client\n");
+
+        // Receive the message from the client
+        int bytes_received = recv(clientfd, buffer, sizeof buffer - 1, 0);
+        buffer[bytes_received] = '\0';
+        // printf("/%s/", buffer);
+
+        int face, lednum;
+        sscanf(buffer, "%d %d", &face, &lednum);
+        ButtonDown(face, lednum);
+        WAIT_FOR_MILISEC(coroutine, 2000);
+
+        // Send a response back to the client
+        const char *response = "Successfully Recieved!!\n";
+        send(clientfd, response, strlen(response), 0);
+        // printf("Sent response to client\n");
+
+        // Close the socket connection
+        close(clientfd);
+        // printf("Closed connection to client\n");
+        YIELD(coroutine);
+    }
+
+    // Free the address information
+    freeaddrinfo(res);
+    END_COROUTINE(coroutine);
+}
 
 static void* ptr;
 static const char* name = "input";
@@ -37,7 +123,15 @@ void int_handler(int sig)
     memcpy(ptr,buf,sizeof(int)*4);
 }
 void exit_handler(int sig){
+    static int time=0;
     munmap(ptr,SIZE);
+    CubeInit();
+    ChangeColorImm();
+    // WAIT_FOR_MILISEC(coroutine, 1000);
+    ++time;
+    if (time>1){
+        exit(0);
+    }
     exit(0);
 }
 void getinput(){
@@ -86,6 +180,8 @@ int mode=1;
 void ButtonDown(int face, int lednum)
 {
     printf("%d %s \n", face*9+lednum,dlcs[face*9+lednum]);
+    SetColor(face, lednum, MakeRandomColor());
+    StartFadeColorCoroutine(FadeColor, face, lednum, 3000);
     if (mode==0){
         shm_unlink(name);
         exit(0);
@@ -96,22 +192,21 @@ void ButtonDown(int face, int lednum)
         CubeInit();
         ChangeColorImm();
         mode=0;
+        return;
         // exit(333);
     }
     pid_t pid=0;
-    if(face*9+lednum<10){
+    if(face*9+lednum<11){
         pid =fork();
         printf("forked\n");
         int childstat;
         if(pid==0){
-            // execl("/home/chek/syspro/system-programming9/dicetest","dicetest",NULL);
             printf("i'm child\n");
             printf("%s ex\n",dlcs[face*9+lednum]);
-            // execlp(dlcs[face*9+lednum],dlcs[face*9+lednum],NULL);
-            // execlp(dlcs[face*9+lednum],dlcs[face*9+lednum],NULL);
-            execlp("cross","cross",NULL);
-            // printf("child\n");
-            // exit(1234);
+            char dest[100] = "./dlc/";
+            strcat(dest, dlcs[face*9+lednum]);
+            printf("%s\n",dest);
+            execlp(dest,dest,NULL);
 
         }
         else{
@@ -121,6 +216,7 @@ void ButtonDown(int face, int lednum)
             wait(&childstat);
             // buf[3]=0;
             // memcpy(ptr,buf,sizeof(int)*5);
+            menuinit();
             printf("%d  child end\n",childstat);
             printf("%d \n",WEXITSTATUS(childstat));
             printf("this is the parae\n");
@@ -152,18 +248,8 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 }
 
 // 프로그램이 시작되면 최초 한 번 실행된다.
-void Start()
-{    //위쪽 알려주기
-    // tone(1);
-    // usleep(300000);
-    // tone(3);
-    // usleep(300000);
-    // tone(5);
-    // usleep(300000);
-    // tone(8);
-    // usleep(300000);
-    // tone(0);
-    //부팅 에니메이션
+void menuinit(){
+    CubeInit();
     FILE *option;
     option=fopen("dlc.config","r");
     char buff[32];
@@ -181,18 +267,35 @@ void Start()
         tmp.r=r;
         tmp.g=g;
         tmp.b=b;
-        // SetColor(idx/8,idx%8,tmp);
-        SetColor(idx/8,idx%8,tmp);
-        // dlcs[idx]=buff;
+        SetColor(idx/9,idx%9,tmp);
         strcpy( dlcs[idx],buff); 
     }
     for(int w=0;w<10;++w){
         printf("%d %s\n",w,dlcs[w]);
     }
     // StartFadeColorCoroutine(FadeColor, face, lednum, 5000);
-    getinput();
+    
     ChangeColorImm();
+    fclose(option);
     printf("start end\n");
+}
+void Start()
+{    //위쪽 알려주기
+    tone(1);
+    usleep(300000);
+    tone(3);
+    usleep(300000);
+    tone(5);
+    usleep(300000);
+    tone(8);
+    usleep(300000);
+    tone(0);
+    //부팅 에니메이션
+    menuinit();
+    printf("tongshin start");
+    // StartCoroutine(tongshin);
+    printf("tongshin end\n");
+    getinput();
     // SetColor(0,0, 0);
     // StartCoroutine(pressButtonsAutomatically);
 }

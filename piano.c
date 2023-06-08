@@ -181,7 +181,9 @@ void ButtonDown(int face, int lednum)
     }
     SetColor(face, lednum, MakeRandomColor());
     StartFadeColorCoroutine(FadeColor, face, lednum, 3000);
-
+    tone(lednum);
+    usleep(300000);
+    tone(0);
     /* ---------------------------------------------------------------------------------------*/
 }
 
@@ -212,7 +214,7 @@ void Start()
 {
     // StartCoroutine(pressButtonsAutomatically);
     srand((unsigned int)time(NULL));
-    StartCoroutine(tongshin);
+    // StartCoroutine(tongshin);
     getinput();
 }
 

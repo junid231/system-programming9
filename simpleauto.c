@@ -22,96 +22,9 @@
 
 #include <stdlib.h>
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
-
-
 static void* ptr;
 static const char* name = "input2";
 static const int SIZE = sizeof(int)*10;
-void tongshin(Coroutine *coroutine) {
-    static struct addrinfo hints, *res;
-    static int sockfd, clientfd, status;
-    static char buffer[1024];
-
-    BEGIN_COROUTINE(coroutine);
-
-    // Set up socket parameters
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    
-    // Resolve the IP address of the local host using getaddrinfo
-    status = getaddrinfo(NULL, "5000", &hints, &res);
-    if (status != 0) {
-        fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
-        exit(1);
-    }
-
-    // Create a socket object and bind it to the local address
-    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    if (sockfd == -1) {
-        perror("socket error");
-        exit(1);
-    }
-
-    static int reuse = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse);
-
-    status = bind(sockfd, res->ai_addr, res->ai_addrlen);
-    if (status == -1) {
-        perror("bind error");
-        exit(1);
-    }
-
-    // Listen for incoming connections
-    status = listen(sockfd, 1);
-    if (status == -1) {
-        perror("listen error");
-        exit(1);
-    }
-    
-    // printf("Listening on port 5000...\n");
-
-    while (1) {
-        // Accept a new connection
-        clientfd = accept(sockfd, NULL, NULL);
-        if (clientfd == -1) {
-            perror("accept error");
-            continue;
-        }
-        
-        // printf("Accepted connection from client\n");
-
-        // Receive the message from the client
-        int bytes_received = recv(clientfd, buffer, sizeof buffer - 1, 0);
-        buffer[bytes_received] = '\0';
-        // printf("/%s/", buffer);
-
-        int face, lednum;
-        sscanf(buffer, "%d %d", &face, &lednum);
-        ButtonDown(face, lednum);
-        WAIT_FOR_MILISEC(coroutine, 2000);
-
-        // Send a response back to the client
-        const char *response = "Successfully Recieved!!\n";
-        send(clientfd, response, strlen(response), 0);
-        // printf("Sent response to client\n");
-
-        // Close the socket connection
-        close(clientfd);
-        // printf("Closed connection to client\n");
-        YIELD(coroutine);
-    }
-
-    // Free the address information
-    freeaddrinfo(res);
-    END_COROUTINE(coroutine);
-}
 void int_handler(int sig)
 {
     int buf[6]={0,0,0,0,0,0};
@@ -210,9 +123,8 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 // 프로그램이 시작되면 최초 한 번 실행된다.
 void Start()
 {
-    // StartCoroutine(pressButtonsAutomatically);
+    StartCoroutine(pressButtonsAutomatically);
     srand((unsigned int)time(NULL));
-    StartCoroutine(tongshin);
     getinput();
 }
 

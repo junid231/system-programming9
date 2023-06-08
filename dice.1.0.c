@@ -26,8 +26,8 @@ void ButtonDown(int face, int lednum)
     /* ---------- 여기에 몇 번 face의 몇 번 버튼이 눌렸을 때 어떤 동작을 수행할지를 작성 ----------*/
 
     // 버튼 기준 상하좌우 십자 모양으로 LED 토글하는 애플리케이션
-    if (face==1 && lednum==8){
-        exit(3);
+    if (face==0 && lednum==0){
+        exit(0);
     }
     int num=rand()%6;
     Color now;

@@ -55,7 +55,7 @@ void pressButtonsAutomatically(Coroutine *coroutine) {
 // 프로그램이 시작되면 최초 한 번 실행된다.
 void Start()
 {
-    // StartCoroutine(pressButtonsAutomatically);
+    StartCoroutine(pressButtonsAutomatically);
 }
 
 // 매 Timing Sequence (deltaTime ms) 마다 실행된다.
